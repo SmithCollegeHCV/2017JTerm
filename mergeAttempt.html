@@ -21,7 +21,7 @@ text {
   font-size: 8pt;
 }
 
-link-line{
+line.link{
   stroke:black;
 }
 
@@ -42,6 +42,7 @@ rect.cell.active{
 
 
 
+
 </style>
 <script src="//d3js.org/d3.v4.min.js" charset="utf-8"></script>
 <h1><i>Les Misérables</i> Co-occurrence</h1>
@@ -51,8 +52,6 @@ rect.cell.active{
 
 <p>Order: <select id="order">
   <option value="name">by Name</option>
-  <option value="count">by Frequency</option>
-  <option value="group">by Cluster</option>
 </select>
 <p>This matrix diagram visualizes character co-occurrences in Victor Hugo’s <i><a href="http://en.wikipedia.org/wiki/Les_Misérables">Les Misérables</a></i>.
 <p>Each colored cell represents two characters that appeared in the same chapter; darker cells indicate characters that co-occurred more frequently.
@@ -80,7 +79,7 @@ var svg = d3.select("body").append("svg")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 //import data in json format
-d3.json("miserables.json", function(miserables) {
+d3.json("mhealth.json", function(miserables) {
       var matrix = [],
       nodes = miserables.nodes,
       n = nodes.length;
@@ -200,13 +199,21 @@ d3.json("miserables.json", function(miserables) {
     var row = grid.getElementById(p.y); //retrieves the row of p.y, point name index of column
     d3.select(row).selectAll("rect").classed("active", function(d, i){ return true;}); 
 
+    //need a string format for p.x to use querySelectorAll 
+    var str1 = "rect[group="  
+    var str2 = p.x.toString() 
+    var str2_5 = "'".concat(str2);
+    var str2_new = str2_5.concat("'");
+    var str3 = "]"
+    var str4 = str1.concat(str2_new);
+    var str5 = str4.concat(str3);
+
     //makes all the cells of a column into their active states 
-    var cells = document.querySelectorAll("[group]")  //selects all cells
-    for (var i = 0 ; i < cells.length; i++){ //loops through each cell
-      if(cells[i].getAttribute("group") == p.x){ //if cell name index matches p.x, point name index of row 
-        d3.select(cells[i]).classed("active", function(d,i){return true;}) //activate color 
-      }
-    }
+    var cells = document.querySelectorAll(str5)  //selects all cells
+   
+    d3.selectAll(cells).classed("active", function(d,i){return true;}) //activate color for columns 
+
+
   }
 
   //event handler for when mouse hovering over adjacencyMatrix stops 
@@ -238,7 +245,7 @@ d3.json("miserables.json", function(miserables) {
   var timeout = setTimeout(function() {
     order("group");
     d3.select("#order").property("selectedIndex", 2).node().focus();
-  }, 5000);
+  }, 50000);
   
 });
 
@@ -268,17 +275,18 @@ var simulation = d3.forceSimulation()
 
 
 //import data from json file 
-d3.json("miserables.json", function(error, graph) {
+d3.json("mhealth.json", function(error, graph) {
   if (error) throw error;
 
   //sets the html format of the links 
   var link = graphSvg.append("g")
       .attr("class", "links")
-    .selectAll("link-line")
+    .selectAll("line")
       .data(graph.links)
-    .enter().append("link-line")
+    .enter().append("line")
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); })
       .attr("stroke", "black")
+      .attr("class", "link")
   //sets the html format of the nodes 
   var node = graphSvg.append("g")
       .attr("class", "nodes")
@@ -342,12 +350,19 @@ function dragstarted(p) {
     d3.selectAll(".column text").classed("active", function(d, i) {  return i == person1i; }); 
     counter++; 
 
-    var cells = document.querySelectorAll("[group]") 
-    for (var i = 0 ; i < cells.length; i++){
-      if(cells[i].getAttribute("group") == person1i){
-        d3.select(cells[i]).classed("active", function(d,i){return true;})
-      }
-    }
+    //need a string format for person1i to use querySelectorAll 
+    var str1 = "rect[group="  
+    var str2 = person1i.toString() 
+    var str2_5 = "'".concat(str2);
+    var str2_new = str2_5.concat("'");
+    var str3 = "]"
+    var str4 = str1.concat(str2_new);
+    var str5 = str4.concat(str3);
+
+    //makes all the cells of a column into their active states 
+    var cells = document.querySelectorAll(str5)  //selects all cells
+   
+    d3.selectAll(cells).classed("active", function(d,i){return true;}) //activate color for columns 
   }
 }
 
